@@ -1,0 +1,10 @@
+.mid {
+    margin: 0;
+    height: 100vh; /* Set body height to viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+canvas {
+    display: block;
+}

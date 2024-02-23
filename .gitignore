@@ -1,0 +1,11 @@
+# database
+app/app.db
+
+# virtual env files
+venv
+
+# python cache files
+app/__pycache__
+
+# environment file
+.env
