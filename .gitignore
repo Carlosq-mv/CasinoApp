@@ -9,3 +9,9 @@ app/__pycache__
 
 # environment file
 .env
+
+# Pycharm IDE
+.idea
+
+# Delete db script
+rdb.py

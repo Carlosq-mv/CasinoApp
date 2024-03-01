@@ -4,6 +4,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Op
 from wtforms.widgets import TextArea, TextInput
 from .models import User
 from datetime import datetime, timedelta
+import re
 
 # These are like html forms just "wrapped" to work w/ flask
 class SignupForm(FlaskForm):
@@ -31,6 +32,17 @@ class SignupForm(FlaskForm):
         delta = today - timedelta(days=21*365)
         if date_of_birth.data > delta:
             raise ValidationError('You must be at least 21 years old to sign up.')
+        
+    def validate_password(self, password):
+        uppercase = r'[A-Z]'
+        digits = r'\d'
+        special_char_pattern = r'[!@#$%^&*()\-_=+\\|[\]{};:\'",.<>/?]'
+        
+        if len(password.data) < 16:
+            raise ValidationError('Password must be 16 characters long')
+        
+        if (len(re.findall(uppercase, password.data)) < 1 and len(re.findall(special_char_pattern, password.data)) < 2 and len(digits, password.data) < 3):
+            raise ValidationError('Password must be include at least 1 Caps characters and 2 special char and at least 3 numbers')
         
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
