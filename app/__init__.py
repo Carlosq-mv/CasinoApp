@@ -1,9 +1,12 @@
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
-import os
 from flask_login import LoginManager
-from dotenv import load_dotenv
 from flask_mail import Mail
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 # loads .env variables
 load_dotenv() 
@@ -33,16 +36,30 @@ myapp.config.from_mapping(
     MAIL_DEFAULT_SENDER = "noreply@flask.com",
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
-
 )
 mail = Mail(myapp)
 
 # db creation
 db = SQLAlchemy(myapp)
-
 # when app is rum, this method will automatically create the db file
 with myapp.app_context():
-    from app.models import User
-    db.create_all()
+        from app.models import User
+        db.create_all()
+        # NOTE: this admin should be private but for right now leave as is (also look up if there is a better way of doing admin user)
+        # check if there is an admin user in database
+        if not db.session.execute(db.select(User).filter_by(admin=True)).scalar_one_or_none():
+            # create admin user
+            admin = User(
+                username='admin', email='admin@admin.com',
+                date_of_birth=datetime.strptime("1990-01-01", "%Y-%d-%m"),
+                confirmed=True, admin=True,
+            )
+            admin.set_password('1234')
+            db.session.add(admin)
+            db.session.commit() 
+             
+# create instance of admin         
+admin = Admin(myapp)
+admin.add_view(ModelView(User, db.session))
 
 from app import routes
