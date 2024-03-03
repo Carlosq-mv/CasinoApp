@@ -15,3 +15,5 @@ app/__pycache__
 
 # Delete db script
 rdb.py
+
+.DS_Store
