@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_admin import Admin
+# from flask_admin import Admin # can use this later
 from flask_admin.contrib.sqla import ModelView
 from datetime import datetime
 from dotenv import load_dotenv
@@ -58,8 +58,8 @@ with myapp.app_context():
             db.session.add(admin)
             db.session.commit() 
              
-# create instance of admin         
-admin = Admin(myapp)
-admin.add_view(ModelView(User, db.session))
+# create instance of admin  # can use this later       
+# admin = Admin(myapp)
+# admin.add_view(ModelView(User, db.session))
 
 from app import routes
