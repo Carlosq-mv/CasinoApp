@@ -1,54 +1,132 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Euphoria Empire</title>
-        <!--Custom CSS file-->
-        <link rel="stylesheet" href="../static/css/signup.css"> 
-    </head>
-    <body>
-        <div>
-            <h4> SignUp </h4>
-
-            <form method="POST" action="{{ url_for('signup') }}">
-                {{ form.hidden_tag() }}
-                <p> 
-                    {{ form.username(placeholder="Username") }}
-
-                    {% for error in form.username.errors %}
-                    <span style="color: red;">{{ error }}</span>
-                    {% endfor %}
-                </p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euphoria Empire</title>
     
-                <p> 
-                    {{ form.password(placeholder="Password") }}
+    <!-- Font Awesome -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    rel="stylesheet"/>
+    <!-- MDB -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css"
+    rel="stylesheet"/>
+    <link rel="stylesheet" href="../static/css/login.css">
 
-                    {% for error in form.password.errors %}
-                    <span style="color: red;">{{ error }}</span>
-                    {% endfor %}
-                </p>
+</head>
+<body>
+    <section class="background-radial-gradient overflow-hidden full-page-section">
+
+    
+        <div class="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+        <div class="row gx-lg-5 align-items-center mb-5">
+            <div class="col-lg-6 mb-5 mb-lg-0" style="z-index: 10">
+            <h1 class="my-5 display-5 fw-bold ls-tight" style="color: hsl(218, 81%, 95%)">
+                Euphoria <br />
+                <span style="color: hsl(218, 81%, 75%)">Empire</span>
+            </h1>
+            <p class="mb-4 opacity-70" style="color: hsl(218, 81%, 85%)">
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                Temporibus, expedita iusto veniam atque, magni tempora mollitia
+                dolorum consequatur nulla, neque debitis eos reprehenderit quasi
+                ab ipsum nisi dolorem modi. Quos?
+            </p>
+            </div>
+    
+            <div class="col-lg-6 mb-5 mb-lg-0 position-relative">
+            <div id="radius-shape-1" class="position-absolute rounded-circle shadow-5-strong"></div>
+            <div id="radius-shape-2" class="position-absolute shadow-5-strong"></div>
+    
+            <div class="card bg-glass">
         
-                <p>
-                    {{ form.email(placeholder="Email") }}
+                <div class="card-body px-4 py-5 px-md-5">
+                <p class="text-center fs-5">Create New Account</p>
+                <form method="POST" action="{{ url_for('signup') }}">
+                    {{ form.hidden_tag() }}
+                    <!-- 2 column grid layout with text inputs for the first and last names 
+                    <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-outline">
+                        <input type="text" id="form3Example1" class="form-control" />
+                        <label class="form-label" for="form3Example1">First name</label>
+                        
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-outline">
+                        <input type="text" id="form3Example2" class="form-control" />
+                        <label class="form-label" for="form3Example2">Last name</label>
+                        </div>
+                    </div>
+                    </div> -->
 
-                    {% for error in form.email.errors %}
-                    <span style="color: red;">{{ error }}</span>
-                    {% endfor %}
-                </p>
 
-                <p>
-                    {{ form.date_of_birth() }}
+                    <!-- Username input -->
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.username(class="form-control", id="usernameField") }}
+                        {% for error in form.username.errors %}
+                        <span style="color: red;"><i class="fas fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                        {{ form.username.label(class="form-label", for="usernameField") }}
+                    </div>
+    
+                    <!-- Email input -->
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.email(class="form-control", id="emailField") }}
+                        {% for error in form.email.errors %}
+                        <span style="color: red;"><i class="fas fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                        {{ form.email.label(class="form-label", for="emailField") }}
+                    </div>
+    
+                    <!-- Password input -->
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.password(class="form-control", id="passwordField") }}
+                        {% for error in form.password.errors %}
+                        <span style="color: red;"><i class="fas fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                        {{ form.password.label(class="form-label", for="passwordField") }}
+                    </div>
+                    
+                    <!-- Date of Birth input -->
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.date_of_birth(class="form-control", id="dateOfBirthField",) }}
+                        {% for error in form.date_of_birth.errors %}
+                        <span style="color: red;"><i class="fas fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                        {{ form.date_of_birth.label(class="form-label", for="dateOfBirthField") }}
+                    </div>
+                    
+  
+                    <!-- Submit button -->
+                    {{ form.submit(class="btn btn-primary btn-block mb-4") }}
 
-                    {% for error in form.date_of_birth.errors %}
-                    <span style="color: red;">{{ error }}</span>
-                    {% endfor %}
-                </p>
-                
-                {{ form.submit() }}
-            </form>
-            <p> OR </p>
-            <a href="{{'/login'}}" class="button-link">Login To Your Account</a>
+                    <!-- Signup button -->
+                    <div class="text-center">
+                        <p>or login here:</p>
+                        <a href="{{'/login'}}" class="btn btn-link" data-mdb-ripple-init data-mdb-ripple-color="dark">Login</a> 
+                    </div>
+
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
         </div>
-    </body>
+        </div>
+    </section>
+
+
+    <!-- MDB -->
+    <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.umd.min.js">
+    </script>
+</body>
 </html>
