@@ -8,8 +8,9 @@ import re
 
 # These are like html forms just "wrapped" to work w/ flask
 class SignupForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Username 1', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
     email = EmailField('Email', validators=[DataRequired(), Email()])
     date_of_birth = DateField('Enter Date of Birth', validators=[DataRequired()])
     submit = SubmitField('Create Account')

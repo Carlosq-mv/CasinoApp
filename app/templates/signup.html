@@ -93,6 +93,16 @@
                         {% endfor %}
                         {{ form.password.label(class="form-label", for="passwordField") }}
                     </div>
+
+                    <!--Confirm password-->
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.confirm_password(class="form-control", id="confirmPasswordField") }}
+                        {% for error in form.confirm_password.errors %}
+                            <span style="color: red;"><i class="fas fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                        {{ form.confirm_password.label(class="form-label", for="confirmPasswordField") }}
+                    </div>
+
                     
                     <!-- Date of Birth input -->
                     <div class="form-outline mb-4" data-mdb-input-init>
