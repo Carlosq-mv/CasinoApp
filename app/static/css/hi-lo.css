@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+#cards,
+#hidden-card {
+    display: inline-block;
+    vertical-align: top; /* Align the elements at the top */
+    margin: 10px; /* Add some margin around the elements */
+}
+
+#cards img,
+#hidden-card img {
+    height: 165px;
+    width: 115px;
+    margin: 1px;
+}
+
+
+/* My Cards */
+#my-card {
+    margin-top: 20px; /* Add some spacing between "My Cards" and the cards */
+}
+
+#my-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: fixed; /* Fixed position at the bottom */
+    bottom: 0; /* Stick to the bottom of the viewport */
+    left: 0; /* Align to the left */
+    width: 100%; /* Full width */
+    background-color: #f0f0f0; /* Background color */
+    padding: 10px 0; /* Add padding */
+    z-index: 100; /* Ensure it's above other elements */
+}
+
+#my-card img {
+    height: 50px; /* Adjust the height as desired */
+    width: auto; /* Let the width adjust proportionally */
+    margin: 5px; /* Add some margin around the cards */
+}

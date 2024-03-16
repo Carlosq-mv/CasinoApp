@@ -1,0 +1,42 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <link rel="stylesheet" href="../../static/css/hi-lo.css"> 
+
+    {% if play_with == 'play-with-coins' %}
+        <p>Playing with coins</p>
+    {% elif play_with == 'play-with-cash' %}
+        <p>Playing with cash</p>
+    {% endif %}
+
+    <h2>Hi Lo</h2>
+
+    <div>
+        <form id="my-form">
+            {{ form.hidden_tag()}}
+            <p>{{form.amount.label}} {{ form.amount(id="bet-amount")}}</p>
+            <p>{{form.multiplier.label}} {{ form.multiplier(id="multiplier-data")}}</p>
+   
+        </form>
+    </div>
+    <div>
+        <button  onclick="handlePlayClick()" class="btn btn-outline-primary">Lower</button>
+        <button  onclick="play('higher', '{{play_with}}')" class="btn btn-outline-primary">Higher</button>
+    </div>
+    
+        <!-- Cards are displayed here-->
+        <div id="cards">  </div> 
+
+        <!-- Last 5 cards are displayed here -->
+        <div id="my-card">  </div>
+  
+    
+    <br>
+
+
+    <br> <br>
+
+    <!-- Javascript for Hi-Lo game -->
+    <script src="../../static/js/hi-lo.js"></script>
+
+{% endblock %}

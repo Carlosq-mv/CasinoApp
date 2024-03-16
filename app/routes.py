@@ -2,8 +2,8 @@ from flask import jsonify, render_template, redirect, flash, request, url_for
 from flask_login import current_user, login_user, login_required, logout_user
 from flask_mail import Message
 from app import myapp, db, mail
-from app.forms import SignupForm, LoginForm
-from app.utils import generate_token, confirm_token, send_email
+from app.forms import SignupForm, LoginForm, HiLoForm
+from app.utils import generate_token, confirm_token, send_email, process_choice
 from app.models import User
 import random, os, datetime
 
@@ -127,3 +127,50 @@ def sample_graphics():
 @login_required
 def home():
     return render_template("home.html")
+
+
+@myapp.route("/home/hi-lo", methods=['GET', 'POST'])
+@login_required
+def hi_lo():
+    return render_template('HiLo/hi-lo.html')
+
+@myapp.route('/home/hi-lo/<play_with>', methods=['GET', 'POST'])
+@login_required
+def hi_lo_game(play_with):   
+    form = HiLoForm()     
+    if request.method == 'GET':
+        return render_template('HiLo/hi-lo-game.html', play_with=play_with, form=form)
+    elif request.method == 'POST':
+        data = request.json
+        guess = data.get('guess')                   # 'higher' or 'lower' guess
+        amount = data.get('betAmount')              # bet amount
+        mult = data.get('betMultiplier')            # bet multiplier amount
+        card_value = data.get('cardValue')          # current card's value
+        next_card_value = data.get('nextCardValue') # next card's value
+        
+        print()
+        print(f"Guess: {guess}")
+        print(f"Bet Amt: ${amount}")
+        print(f"Multiplier: {mult}x")
+        print(f"Value of curr card: {card_value}")
+        print(f"Value of next card: {next_card_value}")
+        print()
+      
+    
+        # Process the choice and return the result
+        result = process_choice(guess, card_value, next_card_value)
+        
+        if result == 'win':
+            pass
+        elif result == 'tie':
+            pass
+        elif result == 'loss':
+            pass
+        else:
+            print('Invalid choice')
+            
+        return jsonify({'result': result }), 200, {'Content-Type': 'application/json'}
+
+
+
+    
