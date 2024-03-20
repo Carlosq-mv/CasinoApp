@@ -8,9 +8,10 @@
     {% elif play_with == 'play-with-cash' %}
         <p>Sweep Cash total: <span id="currency">{{ currency }}</span></p>
     {% endif %}
+    <div id="win-amount"></div>
 
     <h2>Hi Lo</h2>
-
+    <input type="hidden" id="play_with" value="{{ play_with }}">
     <div class="container">
         <div class="row">
             <div class="col-md-6">
@@ -34,8 +35,8 @@
                     </div>
                 </form>
                 <div>
-                    <button onclick="play('lower', '{{ play_with }}')" class="btn btn-outline-primary">Lower</button>
-                    <button onclick="play('higher', '{{ play_with }}')" class="btn btn-outline-primary">Higher</button>
+                    <button id="lower-button" class="btn btn-outline-primary">Lower</button>
+                    <button id="higher-button" class="btn btn-outline-primary">Higher</button>
                 </div>
             </div>
             <div class="col-md-6 text-center">
@@ -47,7 +48,7 @@
             </div>
         </div>
     </div>
-    
+    <!--onclick="play('higher', '{{ play_with }}')"-->
     <br>
     <br>
     <br>
