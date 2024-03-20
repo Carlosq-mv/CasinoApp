@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField, SelectField, DateField, EmailField, IntegerField, RadioField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional, InputRequired
 from wtforms.widgets import TextArea, TextInput
 from .models import User
 from datetime import datetime, timedelta
@@ -52,8 +52,5 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
     
 class HiLoForm(FlaskForm):
-    amount = IntegerField('Bet Amount', validators=[DataRequired()])
-    multiplier = SelectField('Bet Multiplier', choices=[(2, '2x' ), (3, '3x'), (5, '5x')])
-    #choice = RadioField('Choice', choices=[('higher', 'Higher'), ('lower', 'Lower')])
-    # higher = SubmitField('Higher',  validators=[DataRequired()])
-    #lower = SubmitField('Lower', validators=[DataRequired()])
+    amount = IntegerField('Amount', validators=[InputRequired()])
+    multiplier = SelectField('Multiplier', choices=[(1, '1x' ), (2, '2x')])

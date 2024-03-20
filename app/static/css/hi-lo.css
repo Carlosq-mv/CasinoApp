@@ -12,8 +12,8 @@ body {
 
 #cards img,
 #hidden-card img {
-    height: 165px;
-    width: 115px;
+    height: 195px;
+    width: 145px;
     margin: 1px;
 }
 
@@ -41,3 +41,77 @@ body {
     width: auto; /* Let the width adjust proportionally */
     margin: 5px; /* Add some margin around the cards */
 }
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.col-md-6 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#my-form {
+    width: 100%;
+}
+
+button {
+    margin-right: 10px;
+}
+
+/* Card Animation */
+@keyframes flyIn {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/* Used Card Animation */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Glow for last 5 cards */
+/* @keyframes cardGlow {
+    0% {
+        box-shadow: 0 0 5px rgba(153, 102, 255, 0.5); /* Initial glow effect */
+        border-radius: 10px;
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(153, 102, 255, 0.7); /* Stronger glow effect */
+        border-radius: 10px;
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(153, 102, 255, 0.5); /* Return to initial glow effect */
+        border-radius: 10px;
+    }
+}
+
+.used-card {
+    animation: cardGlow 2s infinite alternate; /* Apply the glow animation to the cards */
+    margin-right: 15px; /* Add padding between each card */
+} */
+/************/
+
+
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.hidden {
+    display: none;
+}
+

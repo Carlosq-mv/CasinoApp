@@ -137,20 +137,22 @@ def hi_lo():
 @myapp.route('/home/hi-lo/<play_with>', methods=['GET', 'POST'])
 @login_required
 def hi_lo_game(play_with):   
-    form = HiLoForm()     
+    form = HiLoForm() 
+    currency = current_user.coins if play_with == 'play-with-coins' else current_user.cash
+    
     if request.method == 'GET':
-        return render_template('HiLo/hi-lo-game.html', play_with=play_with, form=form)
+        return render_template('HiLo/hi-lo-game.html', play_with=play_with, form=form, currency=currency)
     elif request.method == 'POST':
         data = request.json
         guess = data.get('guess')                   # 'higher' or 'lower' guess
-        amount = data.get('betAmount')              # bet amount
-        mult = data.get('betMultiplier')            # bet multiplier amount
+        bet_amount = data.get('betAmount')          # bet amount
+        mult = data.get('betMultiplier')            # bet multiplier bet_amount
         card_value = data.get('cardValue')          # current card's value
         next_card_value = data.get('nextCardValue') # next card's value
         
         print()
         print(f"Guess: {guess}")
-        print(f"Bet Amt: ${amount}")
+        print(f"Bet Amt: ${bet_amount}")
         print(f"Multiplier: {mult}x")
         print(f"Value of curr card: {card_value}")
         print(f"Value of next card: {next_card_value}")
@@ -160,17 +162,29 @@ def hi_lo_game(play_with):
         # Process the choice and return the result
         result = process_choice(guess, card_value, next_card_value)
         
+        
+        # TODO: implement later
+        # if currency < bet_amount:
+        #     pass
+            # if users current currency is less than the amount they bet, 
+            # it should throw an error 
+        
+        # TODO: implement later (handle win, loss, and tie)
         if result == 'win':
-            pass
+            bet_amount += (bet_amount * mult)
+            print(bet_amount)
+            current_user.update_coins(bet_amount)
+            db.session.commit()
+            currency = current_user.coins
         elif result == 'tie':
             pass
         elif result == 'loss':
-            pass
+            bet_amount += (bet_amount * mult)
+            print(bet_amount)
+            current_user.update_coins(-bet_amount)
+            db.session.commit()
+            currency = current_user.coins
         else:
             print('Invalid choice')
             
-        return jsonify({'result': result }), 200, {'Content-Type': 'application/json'}
-
-
-
-    
+        return jsonify({'result': result, 'updated_currency': currency }), 200, {'Content-Type': 'application/json'}
