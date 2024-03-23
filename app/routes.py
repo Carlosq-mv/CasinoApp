@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, login_required, logout_user
 from flask_mail import Message
 from app import myapp, db, mail
 from app.forms import SignupForm, LoginForm, HiLoForm
-from app.utils import generate_token, confirm_token, send_email, process_choice
+from app.utils import generate_token, confirm_token, send_email, process_choice, get_probability, calculate_multiplier
 from app.models import User
 import random, os, datetime
 
@@ -138,53 +138,60 @@ def hi_lo():
 @login_required
 def hi_lo_game(play_with):   
     form = HiLoForm() 
-    currency = current_user.coins if play_with == 'play-with-coins' else current_user.cash
-    
+    currency = round(current_user.coins, 2) if play_with == 'play-with-coins' else round(current_user.cash, 2)
+    mode = 'coins' if play_with == 'play-with-coins' else 'cash'
+    user = current_user
+
     if request.method == 'GET':
         return render_template('HiLo/hi-lo-game.html', play_with=play_with, form=form, currency=currency)
     elif request.method == 'POST':
         data = request.json
-        guess = data.get('guess')                   # 'higher' or 'lower' guess
-        bet_amount = data.get('betAmount')          # bet amount
-        mult = data.get('betMultiplier')            # bet multiplier bet_amount
-        card_value = data.get('cardValue')          # current card's value
-        next_card_value = data.get('nextCardValue') # next card's value
-        
-        print()
-        print(f"Guess: {guess}")
-        print(f"Bet Amt: ${bet_amount}")
-        print(f"Multiplier: {mult}x")
-        print(f"Value of curr card: {card_value}")
-        print(f"Value of next card: {next_card_value}")
-        print()
+        guess = data.get('guess')
+        currentCard = data.get('currentCard')
+        nextCard = data.get('nextCard')
+        betAmount = data.get('betAmount')
+        betMult = data.get('betMult')
+   
+        # print(betMult)
+        # print(data)
+
+        if data.get('action') == 'cashout':
+            winnings = betAmount * betMult
+            print(winnings)
+            print(mode)
+            user.update_currency(winnings, mode)
+            db.session.commit()
+            currency = round(getattr(current_user, mode, 0), 2)
+            return jsonify({'success' : 'winning updated', 'updated_currency' : currency, 'updated_mult' : 1}), 200
       
+        # Verify all data is valid and present
+        if not all ([data, guess, currentCard, nextCard, betAmount]):
+            return jsonify({'error' : 'Missing data or not valid'}), 400
     
-        # Process the choice and return the result
-        result = process_choice(guess, card_value, next_card_value)
-        
-        
-        # TODO: implement later
-        # if currency < bet_amount:
-        #     pass
-            # if users current currency is less than the amount they bet, 
-            # it should throw an error 
-        
-        # TODO: implement later (handle win, loss, and tie)
-        if result == 'win':
-            bet_amount += (bet_amount * mult)
-            print(bet_amount)
-            current_user.update_coins(bet_amount)
-            db.session.commit()
-            currency = current_user.coins
-        elif result == 'tie':
-            pass
-        elif result == 'loss':
-            bet_amount += (bet_amount * mult)
-            print(bet_amount)
-            current_user.update_coins(-bet_amount)
-            db.session.commit()
-            currency = current_user.coins
-        else:
-            print('Invalid choice')
+        try:
+            # Get result based on guess and currentCard's value and nextCard's value
+            result = process_choice(guess, currentCard, nextCard)
             
-        return jsonify({'result': result, 'updated_currency': currency }), 200, {'Content-Type': 'application/json'}
+            # Get probability of 'higher' or 'lower' based on currentCard
+            probability = get_probability(currentCard, guess)
+        except Exception as e:
+            print(e)
+            return jsonify({'error' : 'Invalid data types for: probability, result'}), 400
+        
+        # print(f"Probability: {round(probability, 2)}")
+        
+        if result == 'win':
+            mult = calculate_multiplier(probability)
+            # print(mult)
+            return jsonify({'updated_mult' : mult, 'result' : result }), 200
+        elif result == 'loss':
+            losses = betAmount;
+            user.update_currency(-losses, mode)
+            db.session.commit()
+            currency = round(getattr(current_user, mode, 0), 2)
+            return jsonify({'updated_mult' : 0, 'result' : result, 'updated_currency' : currency, 'lost_money' : losses}), 200
+        elif result == 'tie':
+            return jsonify({'updated_mult' : betMult, 'result' : result }), 200
+            
+            
+        return jsonify({'result': result}), 200, {'Content-Type': 'application/json'}
