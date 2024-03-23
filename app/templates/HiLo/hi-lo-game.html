@@ -1,58 +1,48 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <link rel="stylesheet" href="../../static/css/hi-lo.css"> 
-    
-    {% if play_with == 'play-with-coins' %}
-        <p>Coin total: <span id="currency">{{ currency }}</span></p>
-    {% elif play_with == 'play-with-cash' %}
-        <p>Sweep Cash total: <span id="currency">{{ currency }}</span></p>
-    {% endif %}
-    <div id="win-amount"></div>
+<link rel="stylesheet" href="../../static/css/hi-lo.css"> 
+<input type="hidden" id="play-with" value="{{ play_with }}">
 
+{% if play_with == 'play-with-coins' %}
+    <p>Coin total: <span id="currency">{{ currency }}</span></p>
+{% elif play_with == 'play-with-cash' %}
+    <p>Sweep Cash total: <span id="currency">{{ currency }}</span></p>
+{% endif %}
+<div id="win-amount">Multiplier: <span id="multiplier">1</span>x</div>
+
+<div class="container">
     <h2>Hi Lo</h2>
-    <input type="hidden" id="play_with" value="{{ play_with }}">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <form id="my-form">
-                    {{ form.hidden_tag()}}
+    <button id="start-game">Start Game</button>
+    <button id="cash-out-button">Cash Out</button>
 
-                    <p> {{ form.amount.label }} </p> 
-                    <div class="input-group mb-3">
+    <div class="game-controls">
+        <form id="my-form">
+            {{ form.hidden_tag()}}
 
-                        <span class="input-group-text">$</span> 
-                        {{ form.amount(id="bet-amount", class="form-control", placeholder="0.00") }}
-                        <ul class="errors">
-                            {% for error in form.amount.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div class="mb-3">
-                        <p>{{ form.multiplier.label }} {{ form.multiplier(id="multiplier-data", class="form-select")}}</p>
-                    </div>
-                </form>
-                <div>
-                    <button id="lower-button" class="btn btn-outline-primary">Lower</button>
-                    <button id="higher-button" class="btn btn-outline-primary">Higher</button>
-                </div>
+            <p> {{ form.amount.label }} </p> 
+            <div class="input-group mb-3">
+                <span class="input-group-text">$</span> 
+                {{ form.amount(id="bet-amount", class="form-control", placeholder="0.00") }}
+                <ul class="errors">
+                    {% for error in form.amount.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="col-md-6 text-center">
-                <!-- Current card are displayed here-->
-                <div id="cards"></div> 
-
-                <!-- Last 5 cards are displayed here -->
-                <div id="my-card"></div>
-            </div>
+        </form>
+        <div>
+            <button id="lower-button" disabled>Lower</button>
+            <button id="higher-button" disabled>Higher</button>
         </div>
     </div>
-    <!--onclick="play('higher', '{{ play_with }}')"-->
-    <br>
-    <br>
-    <br>
-    <!-- Javascript for Hi-Lo game -->
-    <script src="../../static/js/hi-lo.js"></script>
+
+    <!-- Current card displayed here-->
+    <div id="current-card" class="text-center"></div> 
+
+    <!-- Last 5 cards displayed here, now directly within container to span full width -->
+    <div id="used-cards" class="text-center"></div>
+</div>
+<script src="../../static/js/hi-lo.js"></script>
 
 {% endblock %}

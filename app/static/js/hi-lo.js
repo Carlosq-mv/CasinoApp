@@ -1,231 +1,249 @@
-let card;
-let cardValue;
-let nextCard;
-let nextCardValue;
-// TODO: fix game loop, handle when deck runs out of cards & reloading webpage
-class CardDeck {
+// Deck class
+class Deck {
     constructor() {
         this.deck = [];
+        this.dealtCards = [];
         this.size = 0;
-    }
-    // Helper function to shuffle the deck
-    shuffleDeck() {
-        for (let i = 0; i < this.deck.length; i++) {
-            let j = Math.floor(Math.random() * this.size); // (0-1) * 52 => (0-51.9999)
-            let temp = this.deck[i];
-            this.deck[i] = this.deck[j];
-            this.deck[j] = temp;
-        }
+        this.maxSize = 52;
+        this.buildDeck();
+        this.shuffleDeck();
     }
 
-    // Helper function to build the deck
+    dealCard() {
+        if (this.isEmpty()) {
+            console.error('No cards in the deck');
+            return undefined;
+        }
+        this.size--;
+        const dealtCard = this.deck.pop();
+        this.dealtCards.push(dealtCard);
+        return dealtCard;
+    }
+
+    nextCard() {
+        if (this.isEmpty()) {
+            console.error('No cards in the deck');
+            return undefined;
+        }
+        return this.deck[this.size - 1];
+    }
+
+
     buildDeck() {
         let values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
         let types = ["C", "D", "H", "S"];
- 
+
         for (let i = 0; i < types.length; i++) {
             for (let j = 0; j < values.length; j++) {
-                this.push_back(values[j] + "-" + types[i]); //A-C -> K-C, A-D -> K-D
+                this.deck.push(values[j] + "-" + types[i]);
+                this.size++;
             }
         }
     }
 
-    // Helper function to get value of the card
+    shuffleDeck() {
+        for (let i = 0; i < this.deck.length; i++) {
+            let j = Math.floor(Math.random() * this.size);
+            [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+        }
+    }
+
     getValue(card) {
+        if (!card) return 0;
         let data = card.split("-"); // "4-C" -> ["4", "C"]
         let value = data[0];
         
-
         if (isNaN(value)) { //A J Q K
             if (value == "A") { // Ace is a wild card
-                return randomNumberGen(0, 11);
+                return 1;
             } 
             return 10;
         }
         return parseInt(value);
     }
-    peek () {
-        if (this.isEmpty()) {
-            console.log('Stack Underflow: No cards in the deck');
-            return undefined;
-        }
-        return this.deck[this.size - 1];
-    }
-    pop_back () {
-        if (this.isEmpty()) {
-            console.log('Stack Underflow: No cards in the deck');
-            return undefined;
-        }
-        const topCardIndex = this.size - 1;
-        const topCard = this.deck[topCardIndex];
-        // this.deck.pop();
-        this.deck.splice(topCardIndex, 1);
-        this.size--;
-        return topCard;
-    }
+
     isEmpty() {
-        if(this.size === 0) {
-            console.log('Error: No cards left');
-            return true;
-        }
-        return false;
+        return this.size === 0;
     }
-    push_back(card_value) {
-        if(this.size === 52) {
-            console.log('Stack Overflow: No more than 52 cards at a time');
-            return undefined;
-        }
-        this.deck[this.size] = card_value;
-        this.size++;
+
+    isFull() {
+        return this.size === this.maxSize;
+    }
+
+    getDeck() {
+        return this.deck;
     }
 }
-class GameClass {
-    constructor() {
-        this.displayedCards = [];
+// Make sure DOM is loaded before and JS code runs
+document.addEventListener("DOMContentLoaded", function() {
+    // Buttons from HTML doc
+    const startButton = document.getElementById('start-game');
+    const lowerButton = document.getElementById('lower-button');
+    const higherButton = document.getElementById('higher-button');
+    const cashOutButton = document.getElementById('cash-out-button');
+    // Mode (playing w/ coins or cash)
+    const mode = document.getElementById('play-with').value;
+    let cardDeck, currentCard;
+
+    function mainGame() {
+        cardDeck = new Deck(); // Initialize the deck
+        currentCard = cardDeck.dealCard(); // Deal the first card
+        updateScreen(currentCard); // Update the screen with the first card
+        updateUsedCardsDisplay()
+        lowerButton.disabled = false;
+        higherButton.disabled = false;
+        startButton.style.display = 'none';
+        document.getElementById("cash-out-button").style.display = 'inline-block'; // Adjust display as needed
     }
- 
-    update_screen() {
-        // Update to show only last 5 cards
-        if (this.displayedCards.length < 5) {
-            this.displayedCards.push(card); 
-        } else {
-            this.displayedCards.shift(); 
-            this.displayedCards.push(card);
+    function startNewRound() {
+        // Reset the deck
+        cardDeck = new Deck(); 
+        
+        // Clear the screen
+        clearScreen();
+  
+        // Re-enable the buttons
+        lowerButton.disabled = false;
+        higherButton.disabled = false;
+
+        startButton.style.display = 'inline-block'; // Show the Start Game button
+        document.getElementById("cash-out-button").style.display = 'none'; // Hide the Cash Out button
+
+        console.log("New round started");
+    }
+    // Handles when user clicks 'higher' or 'lower' button
+    function handleClick(event) {
+        // Make sure there is an input
+        if (!validateForm()) {
+            return;
         }
+        const nextCard = cardDeck.nextCard();
+        if (!nextCard) return; // No more cards
 
-        // Display cards from displayedCards
-        document.getElementById("my-card").innerHTML = ""; // Clear existing cards
+        // Get all of the values
+        const guess = event.target.id === 'higher-button' ? 'higher' : 'lower';
+        const currentCardValue = cardDeck.getValue(currentCard);
+        const nextCardValue = cardDeck.getValue(nextCard);
+        const betAmount = parseFloat(document.getElementById('bet-amount').value);
+        const betMult = parseFloat(document.getElementById('multiplier').textContent);
 
-        for (const card of this.displayedCards) {
-            let usedCardDiv = document.createElement("div");
-            usedCardDiv.className = "used-card";
+        // Data to be sent and process by Flask Backend
+        const dataToSend = {
+            "guess": guess,
+            "currentCard": currentCardValue,
+            "nextCard": nextCardValue,
+            "betAmount": betAmount,
+            "betMult": betMult,
+        };
+        sendDataToBackend(dataToSend);
+
+        // Prepare for the next round
+        currentCard = cardDeck.dealCard(); // Move to the next card
+        if (!currentCard) {
+            console.log("Game Over: No more cards.");
+            lowerButton.disabled = true;
+            higherButton.disabled = true;
+            return;
+        }
+        updateScreen(currentCard);
+        updateUsedCardsDisplay();
+    }
+    // Validates bet amount input form (user must input a value)
+    function validateForm() {
+        let betAmountInput = document.getElementById("bet-amount");
+        let isValid = betAmountInput.checkValidity(); 
+
+        if (!isValid) {
+            betAmountInput.reportValidity();
+        }
+        return isValid;
+    }
+    /*************** Screen/UI helper methods ***************/
+    // Clear Screen of all cards (current card, used cards) -- used when starting new round
+    function clearScreen() {
+        // Function to clear the game screen/UI
+        const cardContainer = document.getElementById("current-card");
+        const usedCardsContainer = document.getElementById("used-cards");
     
-            let usedCardImg = document.createElement("img");
-            usedCardImg.src = "../../static/images/cards/" + card + ".png";
-            usedCardImg.style.animation = "fadeIn 1s forwards";
-    
-            usedCardDiv.appendChild(usedCardImg);
-            document.getElementById("my-card").appendChild(usedCardDiv);
-            
-        }
-        // prevent previous cards from populating screen
-        document.getElementById("cards").innerHTML = ""
-    }   
-
-}
-let deck_cards = new CardDeck();
-let game_w = new GameClass();
-
-window.onload = startGame();
-
-function startGame() {
-    deck_cards.buildDeck();
-    deck_cards.shuffleDeck();
-    renderGame();
-    document.getElementById("lower-button").addEventListener("click", () => play("lower"));
-    document.getElementById("higher-button").addEventListener("click", () => play("higher"));
-}
-
-function renderGame() {
-    
-    if (deck_cards.isEmpty()) {
-        // TODO: display wins and loss stats after cards run out
-        return
+        // Clear the current card display and used cards display
+        cardContainer.innerHTML = '';
+        usedCardsContainer.innerHTML = '';
     }
+    // Loads a new card to the screen, and makes sure no more than 1 card populates the screen
+    function updateScreen(card) {
+        const cardContainer = document.getElementById("current-card");
 
-    // Current card 
-    let cardImg = document.createElement("img");
-    card = deck_cards.pop_back();
-    console.log(card);
-
-    cardValue = deck_cards.getValue(card);
-    cardImg.src = "../../static/images/cards/" + card + ".png";
-    cardImg.style.animation = "flyIn 1s forwards";  // add animation when new card loads
-    document.getElementById("cards").appendChild(cardImg);
-
-    // Next card
-    nextCard = deck_cards.peek();
-    nextCardValue = deck_cards.getValue(nextCard);
-
-    console.log(`card: ${card} -- value ${deck_cards.getValue(card)}`)
-    console.log(`next card: ${nextCard} -- value ${deck_cards.getValue(nextCard)} `)
-    console.log(deck_cards.deck);
-}
-
-
-
-
-function play(guess) { 
-    const play_with = document.getElementById("play_with").value;
-    console.log("play_with:", play_with);
-
-    if (!validateForm()) {
-        return;
-    }
-    // Get bet amount
-    const betAmount = parseInt(document.getElementById("bet-amount").value);
-    // Get bet multiplier
-    const betMultiplier = parseInt(document.getElementById("multiplier-data").value);
-
-    ajaxConnection(guess, play_with, betAmount, betMultiplier);
-    game_w.update_screen();
-    renderGame();
-}
-
-// Sends data to Flask backend and handles data sent from Flask backend
-function ajaxConnection(guess, play_with, betAmount, betMultiplier) {
-    
-    fetch(`/home/hi-lo/${play_with}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ 
-            "guess": guess, 
-            "cardValue" : cardValue,
-            "betAmount" : betAmount,
-            "betMultiplier" : betMultiplier,
-            "nextCardValue" : nextCardValue
-         })
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
+        // Remove any existing image before adding a new one
+        while (cardContainer.firstChild) {
+            cardContainer.removeChild(cardContainer.firstChild);
         }
-        throw new Error("Network response was not ok.");
-    })
-    .then(data => { // Handle the response from the Flask backend
-        // handles and dynamically updates user's cash/coin amount
-        document.getElementById("currency").innerText = data.updated_currency;
 
-        //console.log(`updated currency ${data.updated_currency}`);
+        // Create a new img element for the card
+        let cardImg = document.createElement("img");
+        cardImg.src = `../../static/images/cards/${card}.png`;
+        cardImg.alt = card; // alt text
+        cardImg.style.animation = "flyIn 1s ease-in-out"; // animation
 
-        if(data.result === "win")
-            console.log("you won");
-        else if(data.result === "tie")
-            console.log("you tied");
-        else
-            console.log("you lost");
-    })
-    .catch(error => {
-        console.error("There was a problem with the fetch operation:", error);
+        // Append the new img element to the container
+        cardContainer.appendChild(cardImg);
+    }
+    // Used cards during a round will be displayed under the current card
+    function updateUsedCardsDisplay() {
+        const usedCardsContainer = document.getElementById("used-cards");
+        usedCardsContainer.innerHTML = ""; // Clear previous cards
+
+        cardDeck.dealtCards.forEach(card => {
+            const cardImg = document.createElement("img");
+            cardImg.src = `../../static/images/cards/${card}.png`;
+            cardImg.alt = card;
+            cardImg.classList.add("used-card"); // Apply styling
+            usedCardsContainer.appendChild(cardImg);
+        });
+    }
+    /************ Send & Get Date from Flask Backend ************/
+    function sendDataToBackend(data) {
+        fetch(`/home/hi-lo/${mode}`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            // Handle any response from the backend here
+            // For example, update the frontend with new currency values
+            if(data.result == 'loss')
+                startNewRound();
+            if(data.updated_mult != undefined)
+                document.getElementById('multiplier').innerHTML = data.updated_mult;
+            if(data.updated_currency != undefined)
+                document.getElementById('currency').innerHTML = data.updated_currency;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+    // Add an action when a button is clicked
+    higherButton.addEventListener('click', handleClick);
+    lowerButton.addEventListener('click', handleClick);
+    cashOutButton.addEventListener('click', function() {
+        // Logic to handle cashing out, like saving the score or resetting for a new game
+        console.log("Player cashed out!");
+        const betAmount = parseFloat(document.getElementById('bet-amount').value);
+        const betMult = parseFloat(document.getElementById('multiplier').textContent);
+        
+        const data = {
+            'action' : 'cashout',
+            'betAmount' : betAmount,
+            'betMult' : betMult,
+        }
+        sendDataToBackend(data);
+        startNewRound(); 
     });
-}
-
-// Validates bet amount inout form (user must input a value)
-function validateForm() {
-    let betAmountInput = document.getElementById("bet-amount");
-    let isValid = betAmountInput.checkValidity(); 
-
-    if (!isValid) {
-        betAmountInput.reportValidity();
-    }
-    return isValid;
-}
-
-function randomNumberGen(min, max) {
-    const random = Math.random();
-    const random_num = random * (max - min) + min;
-    return Math.floor(random_num);
-}
-
+    startButton.addEventListener('click', function() {
+        this.style.display = 'none';
+        mainGame();
+    });
+});
