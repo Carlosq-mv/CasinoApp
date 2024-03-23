@@ -32,7 +32,7 @@ def send_email(to, subject, template):
     
     
 def process_choice(guess, card_value, next_card_value):
-    if card_value and next_card_value not in range(1, 11):
+    if card_value and next_card_value not in range(1, 14):
         raise Exception('Not a valid card value')
     if guess not in ('higher', 'lower'):
         raise Exception('Not a valid guess')
@@ -54,7 +54,7 @@ def process_choice(guess, card_value, next_card_value):
 
 
 def get_probability(card, guess):
-    if card not in range(1, 11):
+    if card not in range(1, 14):
         raise Exception('Not a valid card value')
     if guess not in ('higher', 'lower'):
         raise Exception('Not a valid guess')
@@ -77,7 +77,11 @@ def calculate_multiplier(probability):
     if probability <= 0:
         raise Exception('Probability must be higher than 0')
     global multiplier
-    # print(f"base mult {multiplier}")
+    print(f"base mult {multiplier}")
 
     multiplier += abs(log(probability))
     return round(multiplier, 2)
+
+def clearMult():
+    global multiplier 
+    multiplier = 1

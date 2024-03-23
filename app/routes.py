@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, login_required, logout_user
 from flask_mail import Message
 from app import myapp, db, mail
 from app.forms import SignupForm, LoginForm, HiLoForm
-from app.utils import generate_token, confirm_token, send_email, process_choice, get_probability, calculate_multiplier
+from app.utils import generate_token, confirm_token, send_email, process_choice, get_probability, calculate_multiplier, clearMult
 from app.models import User
 import random, os, datetime
 
@@ -153,7 +153,7 @@ def hi_lo_game(play_with):
         betMult = data.get('betMult')
    
         # print(betMult)
-        # print(data)
+        print(data)
 
         if data.get('action') == 'cashout':
             winnings = betAmount * betMult
@@ -161,8 +161,9 @@ def hi_lo_game(play_with):
             print(mode)
             user.update_currency(winnings, mode)
             db.session.commit()
+            clearMult()
             currency = round(getattr(current_user, mode, 0), 2)
-            return jsonify({'success' : 'winning updated', 'updated_currency' : currency, 'updated_mult' : 1}), 200
+            return jsonify({'success' : 'winning updated', 'updated_currency' : currency, 'updated_mult' : 1, 'win_amount' : round(winnings, 2)}), 200
       
         # Verify all data is valid and present
         if not all ([data, guess, currentCard, nextCard, betAmount]):
@@ -175,23 +176,33 @@ def hi_lo_game(play_with):
             # Get probability of 'higher' or 'lower' based on currentCard
             probability = get_probability(currentCard, guess)
         except Exception as e:
-            print(e)
+            print(f"Error: {e}")
             return jsonify({'error' : 'Invalid data types for: probability, result'}), 400
         
         # print(f"Probability: {round(probability, 2)}")
         
         if result == 'win':
+            # Displays compounded multiplier
             mult = calculate_multiplier(probability)
             # print(mult)
-            return jsonify({'updated_mult' : mult, 'result' : result }), 200
+            return jsonify({'result' : result, 'updated_mult' : mult }), 200
         elif result == 'loss':
-            losses = betAmount;
-            user.update_currency(-losses, mode)
-            db.session.commit()
-            currency = round(getattr(current_user, mode, 0), 2)
-            return jsonify({'updated_mult' : 0, 'result' : result, 'updated_currency' : currency, 'lost_money' : losses}), 200
+            # Updated database with losses
+            try:
+                losses = betAmount;
+                user.update_currency(-losses, mode)
+                db.session.commit()
+                currency = round(getattr(current_user, mode, 0), 2)
+                clearMult()
+            except Exception as e:
+                db.session.rollback()
+                print(f"Error: {e}")
+                return jsonify({'error' : 'Database operation failed'}), 400
+            
+            return jsonify({'result' : result, 'updated_mult' : 1, 'updated_currency' : currency, 'lost_money' : losses}), 200
         elif result == 'tie':
-            return jsonify({'updated_mult' : betMult, 'result' : result }), 200
+            # Displays the same (nothing changes)
+            return jsonify({'result' : result, 'updated_mult' : betMult, }), 200
             
             
         return jsonify({'result': result}), 200, {'Content-Type': 'application/json'}

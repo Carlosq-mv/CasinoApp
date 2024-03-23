@@ -27,6 +27,8 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password, password)
     
     def update_currency(self, value, mode):
+        if mode not in ('coins', 'cash'):
+            raise Exception('Not a valid mode. Must be Coins or Cash')
         if mode == 'coins':
             self.coins += value
         elif mode == 'cash':
