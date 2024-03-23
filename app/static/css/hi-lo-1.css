@@ -1,0 +1,107 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(145deg, #121212, #1A1A1A);
+    color: #B3B3B3;
+    margin: 0;
+    /*text-align: center;*/
+    background-repeat: no-repeat; /* This will stop the background from repeating */
+    background-attachment: fixed; /* This will keep the gradient fixed during scroll */
+    background-size: cover; 
+}
+
+h2 {
+    color: #FFD700;
+    margin: 20px 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Center buttons vertically */
+    flex-wrap: wrap; /* Allow buttons to wrap onto the next line if space runs out */
+    padding: 15px; /* Add some padding to ensure space around the buttons */
+    background-color: #333; /* The color of the background */
+    border-radius: 10px; /* Rounded corners for the background */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.6); /* Shadow for the background */
+    margin-top: 20px; /* Spacing from the top element */
+    width: 100%; /* Ensure the container takes full width */
+}
+
+.btn-group {
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    gap: 10px; /* Add space between buttons */
+}
+.btn {
+    max-width: 200px; /* Adjust max-width as needed */
+    white-space: nowrap; /* Prevents text from wrapping to the next line */
+    padding: 10px; /* Adjust padding as needed, may reduce if the button is too tall */
+    overflow: hidden; /* Keeps content within the button */
+    text-overflow: ellipsis; /* Adds an ellipsis if the text is too long for the button */
+    font-size: 0.9em;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    align-items: flex-start; /* Align items to the left */
+}
+
+/* Additional CSS to ensure proper spacing and alignment */
+.card-body > * {
+    margin-bottom: 10px; /* Add space between elements inside card-body */
+}
+
+.btn-cash {
+    background-color: #d8cca8;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 10px;
+    transition: transform 0.3s ease;
+}
+.btn-cash:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.8);
+    color: white;
+    background-color: #19692c;
+}
+.btn-coins {
+    background-color: #d8cca8;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 10px;
+    transition: transform 0.3s ease;
+}
+.btn-coins:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.8);
+    color: white;
+    background-color: #ffd700;
+}
+
+
+.card-img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+}
+.card-title, .card-text {
+    color: #B3B3B3;
+}
+
