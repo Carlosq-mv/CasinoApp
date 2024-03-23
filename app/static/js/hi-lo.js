@@ -32,13 +32,21 @@ class Deck {
     buildDeck() {
         let values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
         let types = ["C", "D", "H", "S"];
-
         for (let i = 0; i < types.length; i++) {
             for (let j = 0; j < values.length; j++) {
                 this.deck.push(values[j] + "-" + types[i]);
                 this.size++;
             }
         }
+        // Remove two A's, two K's and two J's
+        // this.deck = [
+        //     "A-C", "2-C", "3-C", "4-C", "5-C", "6-C", "7-C", "8-C", "9-C", "10-C", "J-C", "Q-C", "K-C",
+        //     "A-D", "2-D", "3-D", "4-D", "5-D", "6-D", "7-D", "8-D", "9-D", "10-D", "J-D", "Q-D", "K-D",
+        //     "A-H", "2-H", "3-H", "4-H", "5-H", "6-H", "7-H", "8-H", "9-H", "10-H", "J-H", "Q-H", "K-H",
+        //     "A-S", "2-S", "3-S", "4-S", "5-S", "6-S", "7-S", "8-S", "9-S", "10-S", "J-S", "Q-S", "K-S"
+        // ];
+        // this.size = this.deck.length;
+        
     }
 
     shuffleDeck() {
@@ -54,12 +62,20 @@ class Deck {
         let value = data[0];
         
         if (isNaN(value)) { //A J Q K
-            if (value == "A") { // Ace is a wild card
+            if(value == "A") 
                 return 1;
-            } 
-            return 10;
+            else if(value == "K") 
+                return 13;
+            else if(value == "Q")
+                return 12;
+            else if(value == "J")
+                return 11;
         }
         return parseInt(value);
+    }
+
+    sizeOf() {
+        return this.size;
     }
 
     isEmpty() {
@@ -108,11 +124,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
         startButton.style.display = 'inline-block'; // Show the Start Game button
         document.getElementById("cash-out-button").style.display = 'none'; // Hide the Cash Out button
+        document.getElementById("used-cards").style.display = "none";   // Hide the used cards div
 
         console.log("New round started");
     }
     // Handles when user clicks 'higher' or 'lower' button
     function handleClick(event) {
+        console.log(currentCard)
+        console.log(cardDeck.getDeck())
+        console.log(cardDeck.sizeOf())
+
         // Make sure there is an input
         if (!validateForm()) {
             return;
@@ -168,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Clear the current card display and used cards display
         cardContainer.innerHTML = '';
         usedCardsContainer.innerHTML = '';
+        document.getElementById("used-cards").style.display = "none";
     }
     // Loads a new card to the screen, and makes sure no more than 1 card populates the screen
     function updateScreen(card) {
@@ -190,15 +212,23 @@ document.addEventListener("DOMContentLoaded", function() {
     // Used cards during a round will be displayed under the current card
     function updateUsedCardsDisplay() {
         const usedCardsContainer = document.getElementById("used-cards");
-        usedCardsContainer.innerHTML = ""; // Clear previous cards
+        usedCardsContainer.innerHTML = "";  // Clear previous cards
 
-        cardDeck.dealtCards.forEach(card => {
-            const cardImg = document.createElement("img");
-            cardImg.src = `../../static/images/cards/${card}.png`;
-            cardImg.alt = card;
-            cardImg.classList.add("used-card"); // Apply styling
-            usedCardsContainer.appendChild(cardImg);
-        });
+        if (cardDeck.dealtCards.length > 0) {
+            // There are used cards to display, so make the container visible
+            usedCardsContainer.style.display = "flex";  // Adjust display style as needed
+
+            cardDeck.dealtCards.forEach(card => {
+                const cardImg = document.createElement("img");
+                cardImg.src = `../../static/images/cards/${card}.png`;
+                cardImg.alt = card;
+                cardImg.classList.add("used-card"); // Apply styling
+                usedCardsContainer.appendChild(cardImg);
+            });
+        } else {
+            // No used cards to display, so hide the container
+            usedCardsContainer.style.display = "none";
+        }
     }
     /************ Send & Get Date from Flask Backend ************/
     function sendDataToBackend(data) {
@@ -213,9 +243,23 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             console.log(data);
             // Handle any response from the backend here
-            // For example, update the frontend with new currency values
-            if(data.result == 'loss')
+            if(data.result == 'loss') {
+                let lossModal = new bootstrap.Modal(document.getElementById('outcomeModal'), {});
+                document.getElementById('game-action').textContent = "Game Over";
+                document.getElementById('message').textContent = "Not this time... 🍀 Luck's bound to turn around!";
+                document.getElementById('outcome').textContent = "Losses: $" +data.lost_money;
+                document.getElementById('updated-balance').textContent = data.updated_currency;
+                lossModal.show();
                 startNewRound();
+            } 
+            if(data.success != undefined) {
+                let winModal = new bootstrap.Modal(document.getElementById('outcomeModal'), {});
+                document.getElementById('game-action').textContent = "Cash Out";
+                document.getElementById('message').textContent = "🎉 Congratulations! You've struck gold! 🥇 Keep your streak alive!";
+                document.getElementById('outcome').textContent = "Winnings: $" + data.win_amount;
+                document.getElementById('updated-balance').textContent = data.updated_currency;
+                winModal.show();
+            }
             if(data.updated_mult != undefined)
                 document.getElementById('multiplier').innerHTML = data.updated_mult;
             if(data.updated_currency != undefined)
@@ -245,5 +289,18 @@ document.addEventListener("DOMContentLoaded", function() {
     startButton.addEventListener('click', function() {
         this.style.display = 'none';
         mainGame();
+    });
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Temporarily add a class or directly manipulate the style
+            button.classList.add('clicked');
+
+            // Use a timeout to revert the button back to its original state
+            setTimeout(() => {
+                button.classList.remove('clicked');
+                // Optionally, force blur to remove focus from the button
+                button.blur();
+            }, 200); // Adjust time based on your needs and the length of your animations
+        });
     });
 });
