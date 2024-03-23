@@ -26,11 +26,11 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
     
-    def update_coins(self, coins):
-        self.coins += coins
-
-    def update_cash(self, cash):
-        self.cash += cash
+    def update_currency(self, value, mode):
+        if mode == 'coins':
+            self.coins += value
+        elif mode == 'cash':
+            self.cash += value
         
     def __repr__(self):
         return f'<user {self.id}: {self.username}>'
