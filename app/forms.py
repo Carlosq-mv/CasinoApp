@@ -1,12 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField, SelectField, DateField, EmailField, IntegerField, RadioField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField, SelectField, DateField, EmailField, IntegerField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional, InputRequired
 from wtforms.widgets import TextArea, TextInput
 from .models import User
 from datetime import datetime, timedelta
 import re
 
-# These are like html forms just "wrapped" to work w/ flask
 class SignupForm(FlaskForm):
     username = StringField('Username 1', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -16,8 +15,6 @@ class SignupForm(FlaskForm):
     submit = SubmitField('Create Account')
     
     # customs validators
-    # for example in signup route, we don't have to create code to check if username already exists,
-    # this validator will automatically throw errors and user won't be able to submit wrong data
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
@@ -39,7 +36,7 @@ class SignupForm(FlaskForm):
         digits = r'\d'
         special_char_pattern = r'[!@#$%^&*()\-_=+\\|[\]{};:\'",.<>/?]'
         
-        if len(password.data) < 16:
+        if len(password.data) < 12:
             raise ValidationError('Password must be 16 characters long')
         
         if (len(re.findall(uppercase, password.data)) < 1 and len(re.findall(special_char_pattern, password.data)) < 2 and len(digits, password.data) < 3):
@@ -52,5 +49,4 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
     
 class HiLoForm(FlaskForm):
-    amount = IntegerField('Amount', validators=[InputRequired()])
-    multiplier = SelectField('Multiplier', choices=[(1, '1x' ), (2, '2x')])
+    amount = FloatField('Amount', validators=[InputRequired()])

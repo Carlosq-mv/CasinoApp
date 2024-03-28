@@ -78,6 +78,11 @@ def calculate_multiplier(probability):
         raise Exception('Probability must be higher than 0')
     global multiplier
     print(f"base mult {multiplier}")
+    
+    # if the probability is 75% or higher, take 25% off the multiplier
+    # if probability >= .75:
+    #     multiplier += .25(abs(log(probability)))
+    #     return round(multiplier, 2)
 
     multiplier += abs(log(probability))
     return round(multiplier, 2)
