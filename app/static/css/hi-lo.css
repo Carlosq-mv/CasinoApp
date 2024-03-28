@@ -75,28 +75,30 @@ button:hover::after, button:focus::after {
     display: none; /* Hide the button initially */
 }
 
-#current-card img, #used-cards img {
-    border-radius: 3px;
+#current-card img, #default-card-back img {
+    border-radius: 5px;
     box-shadow: 0 4px 10px rgba(0, 255, 255, 0.5); /* Cyan glow for a more vibrant look */
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: box-shadow 0.5s ease-in-out 0.1s, transform 0.5s ease-in-out 0.1s;
 }
 
-#current-card img:hover, #used-cards img:hover {
-    box-shadow: 0 8px 20px rgba(0, 255, 255, 0.8); /* Brighter and larger glow on hover */
-    transform: perspective(1000px) rotateY(0deg) scale(1.05); /* Flatten and slightly enlarge on hover */
+#current-card img:hover, #used-cards img:hover, #default-card-back img:hover {
+    box-shadow: 0 8px 20px rgba(0, 255, 255, 0.8) !important; /* Brighter and larger glow on hover */
+    transform: scale(1.05) !important; /* Flatten and slightly enlarge on hover */
 }
-
-#current-card img {
+#current-card img, #default-card-back img {
     height: 195px;
     width: 145px;
     margin: 1px;
 }
 
 #used-cards img {
+    border-radius: 3px;
     height: 50px;
     width: auto; /* Maintain aspect ratio */
     margin: 5px; /* Space between cards */
     flex: 0 1 auto; /* Allow cards to shrink but not grow, preserving aspect ratio */
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.5); /* Cyan glow for a more vibrant look */
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 #used-cards {
@@ -110,6 +112,7 @@ button:hover::after, button:focus::after {
     justify-content: center; /* Center cards in the container */
     width: 100%; /* Span the entire width of the container */
 }
+
 /***************************************************************************/
 
 
@@ -133,14 +136,43 @@ button:hover::after, button:focus::after {
     margin-top: 20px;
 }
 
+.input-group {
+    display: flex;
+    border-radius: 20px; /* Rounded corners */
+    overflow: hidden; /* Ensures inner elements do not spill out of the rounded corners */
+}
+
 .input-group-text, .form-control {
+    background: #333; /* Consistent background */
+    border: none; /* No individual borders */
+    color: #FFD700; /* Text color */
+}
+
+/* Keep the border only on the outer wrapper of the input group */
+.input-group {
+    border: 1px solid #FFD700; /* Overall border for the input group */
+}
+
+/* Adjust the border-radius for individual elements within the input group */
+.input-group-text {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.form-control {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+/* Ensure placeholder color is correct */
+.form-control::placeholder {
+    color: #B3B3B3;
+    opacity: 1;
+}
+.form-control:disabled {
     background: #333;
     color: #FFD700;
-    border: 1px solid #FFD700;
-}
-.form-control::placeholder {
-    color: #B3B3B3; /* Your desired placeholder text color */
-    opacity: 1; /* Ensure the placeholder is not rendered with lower opacity */
+    opacity: 1; /* This makes sure that the input does not look faded */
 }
 
 /* Override styles for focus state */
@@ -158,7 +190,47 @@ button:hover::after, button:focus::after {
 }
 
 .errors {
-    color: #ff6b6b; /* Bright red for errors */
+    display: none; /* Hide by default */
+    color: #D32F2F; /* Error color */
+    padding: 0;
+    margin-top: 0.5rem; /* Add some space above the error messages */
+}
+.errors li {
+    display: block; /* Display each error on a new line */
+}
+.game-area {
+    display: flex;
+    justify-content: space-between;
+}
+
+.button-area, .card-display {
+    flex: 1; /* This makes both divs take up equal space. Adjust as needed. */
+}
+
+/* Optional: Add some spacing between the two areas */
+.button-area {
+    margin-right: 20px; /* Adds some space between the buttons and the card display */
+}
+.button-container {
+    display: flex;
+    justify-content: center; /* This centers the buttons in the container */
+    gap: 10px; /* This adds some space between your buttons */
+}
+
+.card-display {
+    display: flex;
+    justify-content: center; /* Center the card horizontally */
+    align-items: center; /* Center the card vertically */
+}
+@media (max-width: 768px) {
+    .game-area {
+        flex-direction: column;
+    }
+
+    .button-area {
+        margin-right: 0;
+        margin-bottom: 20px; /* Adds some space between the buttons and the card on small screens */
+    }
 }
 /***************************************************************************/
 
@@ -175,4 +247,43 @@ button:hover::after, button:focus::after {
         transform: translateX(0);
     }
 }
+/***************************************************************************/
+
+
+/******************************** CSS Modal ********************************/
+/* Below is the css for Modal when there is an error */
+.error-modal .modal-dialog {
+    max-width: 550px;
+    margin: 1.75rem auto;
+}
+
+.error-modal .modal-content {
+    border: 2px solid #D32F2F; /* Primary Error Color: Dark Red */
+    border-radius: 0.5rem;
+    color: #757575; /* Dark Gray for secondary text */
+    background-color: #FFFFFF; /* White background for contrast */
+}
+
+.error-modal .modal-header {
+    background-color: #D32F2F; /* Primary Error Color: Dark Red */
+    color: #FFFFFF; /* White for text on Dark Red background */
+    border-bottom: 2px solid #E57373; /* Lighter Red for a subtle separation */
+}
+
+.error-modal .modal-body {
+    padding: 1.5rem;
+    background-color: #fff; /* Keeping body background white for readability */
+}
+
+.error-modal .modal-footer {
+    border-top: 2px solid #E57373; /* Lighter Red to subtly separate footer */
+    background-color: #fff; /* Consistent with the body for a cohesive look */
+}
+
+/* Below is the css for Modal */
+.modal-content {
+    background-color: #363636; /* Light greyish black color */
+    color: white; /* Text color */
+}
+
 /***************************************************************************/

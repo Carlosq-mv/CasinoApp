@@ -17,3 +17,5 @@ app/__pycache__
 rdb.py
 
 .DS_Store
+
+.vscode
