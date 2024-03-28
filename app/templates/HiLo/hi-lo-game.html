@@ -1,58 +1,64 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <link rel="stylesheet" href="../../static/css/hi-lo.css"> 
-    <input type="hidden" id="play-with" value="{{ play_with }}">
-    
+<link rel="stylesheet" href="../../static/css/hi-lo.css"> 
+<input type="hidden" id="play-with" value="{{ play_with }}">
 
-    {% include "includes/modal.html" %}
-      
+{% include "includes/modal.html" %}
 
-    {% set currency_labels = {
-        'play-with-coins': 'Coin total',
-        'play-with-cash': 'Sweep Cash total'
-    } %}
-    
-    <p>{{ currency_labels[play_with] if play_with in currency_labels else 'Currency' }}:
-         <span id="currency">{{ currency }}</span>
-    </p>
+{% set currency_labels = {
+    'play-with-coins': 'Coin total',
+    'play-with-cash': 'Sweep Cash total'
+} %}
 
-    <div id="win-amount">Multiplier: <span id="multiplier">1</span>x</div>
+<p>{{ currency_labels[play_with] if play_with in currency_labels else 'Currency' }}:
+     <span id="currency">{{ currency }}</span>
+</p>
 
-    <div class="container">
-        <h2>Hi Lo</h2>
-        <button id="start-game">Start Game</button>
-        <button id="cash-out-button">Cash Out</button>
+<div id="win-amount">Multiplier: <span id="multiplier">1</span>x</div>
 
-        <div class="game-controls">
-            <form id="my-form">
-                {{ form.hidden_tag()}}
+<div class="container">
+    <h2>Hi Lo</h2>
+    <div class="game-area">
+        <div class="button-area">
 
-                <p> {{ form.amount.label }} </p> 
-                <div class="input-group mb-3">
-                    <span class="input-group-text">$</span> 
-                    {{ form.amount(id="bet-amount", class="form-control", placeholder="0.00") }}
-                    <ul class="errors">
-                        {% for error in form.amount.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </form>
-            
-            <div>
-                <!-- Buttons 'higher' and 'lower' -->
+            <div class="game-controls">
+                <form id="my-form">
+                    {{ form.hidden_tag()}}
+                    <p> {{ form.amount.label }} </p> 
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span> 
+                        {{ form.amount(id="bet-amount", class="form-control", placeholder="0.00") }}
+                        {% if form.amount.errors %}
+                            <ul class="errors">
+                                {% for error in form.amount.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </form>
+            </div> <br> 
+            <button id="start-game">Start Game</button>
+            <button id="cash-out-button">Cash Out</button>
+            <br> <br>
+            <div class="button-container">
                 <button id="lower-button" disabled>Lower</button>
                 <button id="higher-button" disabled>Higher</button>
             </div>
         </div>
-
-        <!-- Current card displayed here-->
-        <div id="current-card" class="text-center"></div> 
-
-        <!-- Used cards for round displayed here -->
-        <div id="used-cards" class="text-center" style="display: none;"></div>
+        <div class="card-display">
+            <div id="default-card-back"> <img src="../../static/images/cards/BACK.png" alt="Card Back"/></div>
+            
+            <!-- Current card displayed here-->
+            <div id="current-card" class="text-center"></div> 
+            <!-- Audio when new card is shown on screen-->
+            <audio id="audio" src="../../static/sounds/flipcard.mp3"></audio>
+        </div>
     </div>
+    <!-- Used cards for round displayed here -->
+    <div id="used-cards" class="text-center" style="display: none;"></div>
+</div>
 
-    <script src="../../static/js/hi-lo.js"></script>
+<script src="../../static/js/hi-lo.js"></script>
 {% endblock %}
