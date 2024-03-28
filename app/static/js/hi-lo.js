@@ -100,15 +100,21 @@ document.addEventListener("DOMContentLoaded", function() {
     // Mode (playing w/ coins or cash)
     const mode = document.getElementById('play-with').value;
     let cardDeck, currentCard;
+    // Min and Max bet amounts
+    const minBetAmount = 1;
+    // Max Bet Amount is different for coins(10,000) and cash(1200)
+    const maxBetAmount = mode == 'play-with-coins' ? 10000 : 1200;
 
-    function mainGame() {
+    function mainGame() {      
         cardDeck = new Deck(); // Initialize the deck
         currentCard = cardDeck.dealCard(); // Deal the first card
         updateScreen(currentCard); // Update the screen with the first card
-        updateUsedCardsDisplay()
+        updateUsedCardsDisplay();
+        document.getElementById("default-card-back").style.display = 'none';    // Bby default a card back will be shown
         lowerButton.disabled = false;
         higherButton.disabled = false;
-        startButton.style.display = 'none';
+        startButton.style.display = 'none'; // Once game starts, hide 'start game' button
+        document.getElementById('bet-amount').disabled = true;
         document.getElementById("cash-out-button").style.display = 'inline-block'; // Adjust display as needed
     }
     function startNewRound() {
@@ -125,6 +131,9 @@ document.addEventListener("DOMContentLoaded", function() {
         startButton.style.display = 'inline-block'; // Show the Start Game button
         document.getElementById("cash-out-button").style.display = 'none'; // Hide the Cash Out button
         document.getElementById("used-cards").style.display = "none";   // Hide the used cards div
+        document.getElementById("bet-amount").value = "";
+        document.getElementById('bet-amount').disabled = false;
+
 
         console.log("New round started");
     }
@@ -169,15 +178,70 @@ document.addEventListener("DOMContentLoaded", function() {
         updateScreen(currentCard);
         updateUsedCardsDisplay();
     }
+    /*************** Validation methods ***************/
     // Validates bet amount input form (user must input a value)
     function validateForm() {
-        let betAmountInput = document.getElementById("bet-amount");
-        let isValid = betAmountInput.checkValidity(); 
-
-        if (!isValid) {
-            betAmountInput.reportValidity();
+        const betAmountInput = document.getElementById("bet-amount");
+        const betAmountValue = betAmountInput.value.trim();
+    
+        // Check for empty or non-numeric values first
+        if (betAmountValue === '' || isNaN(betAmountValue)) {
+            showOutcomeMessage(
+                "Invalid Bet", 
+                "Please enter a valid numeric bet amount.", 
+                "Non-numeric values or empty input are not allowed.", "");
+            toggleModalStatus(true);
+            return false;
         }
-        return isValid;
+    
+        // Bet amount should now be a number
+        const betAmount = parseFloat(betAmountValue);
+    
+        // Check for other bet validation criteria
+        return validateBetAmount(betAmount);
+    }
+    // Validates bet amount input against minimum and maximum values and user's balance
+    function validateBetAmount(betAmount) {
+        // Get the current user's balance
+        const userBalance = parseFloat(document.getElementById('currency').textContent);
+        console.log(userBalance)
+        const title = 'Error Processing Bet';
+ 
+        // Validate bet amount against minimum and maximum values and user's balance
+        if (betAmount < minBetAmount) {
+            showOutcomeMessage(
+                title, 
+                `Oops! Your bet of $${betAmount} is below the minimum amount of $${minBetAmount}`, 
+                "Please increase your bet to continue", "");
+            toggleModalStatus(true);    // Toggle error modal css
+            return false;
+        } 
+        else if(betAmount > maxBetAmount && betAmount > userBalance) {
+            showOutcomeMessage(
+                title, 
+                `Woah There! Your bet of $${betAmount} is past out max of $${maxBetAmount} and you don't have the sufficient funds`, 
+                "Please lower your bet and adding funds to your balance", "");
+            toggleModalStatus(true);    // Toggle error modal css
+            return false;
+        }
+        else if (betAmount > maxBetAmount) {
+            showOutcomeMessage(
+                title, 
+                `Woah There! Your bet of $${betAmount} is past out max of $${maxBetAmount}`, 
+                "Please lower your bet to continue", ""); 
+            toggleModalStatus(true);    // Toggle error modal css      
+            return false;
+        } 
+        else if (betAmount > userBalance) {
+            showOutcomeMessage(
+                title, 
+                `Look like balance is a bit short. You need at least $${betAmount} in your balance to place this bet`, 
+                `Consider lowering your betting or adding fund to you balance`, "");    
+            toggleModalStatus(true);    // Toggle error modal css  
+            return false;
+        }
+        toggleModalStatus(false);   
+        return true;
     }
     /*************** Screen/UI helper methods ***************/
     // Clear Screen of all cards (current card, used cards) -- used when starting new round
@@ -189,6 +253,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Clear the current card display and used cards display
         cardContainer.innerHTML = '';
         usedCardsContainer.innerHTML = '';
+        document.getElementById("default-card-back").style.display = 'block'; 
         document.getElementById("used-cards").style.display = "none";
     }
     // Loads a new card to the screen, and makes sure no more than 1 card populates the screen
@@ -204,10 +269,19 @@ document.addEventListener("DOMContentLoaded", function() {
         let cardImg = document.createElement("img");
         cardImg.src = `../../static/images/cards/${card}.png`;
         cardImg.alt = card; // alt text
-        cardImg.style.animation = "flyIn 1s ease-in-out"; // animation
+        cardImg.classList.add('animate__animated', 'animate__lightSpeedInRight')    // animation using animate.css
+        // cardImg.style.animation = "flyIn 1s ease-in-out"; // animation
 
+        // Play audio for new card
+        let myAudio = document.querySelector('#audio');
+        if (myAudio) {
+            myAudio.play().catch(error => {
+                console.log('Error playing audio:', error);
+            });
+        }
         // Append the new img element to the container
         cardContainer.appendChild(cardImg);
+        
     }
     // Used cards during a round will be displayed under the current card
     function updateUsedCardsDisplay() {
@@ -230,7 +304,25 @@ document.addEventListener("DOMContentLoaded", function() {
             usedCardsContainer.style.display = "none";
         }
     }
-    /************ Send & Get Date from Flask Backend ************/
+    // Used to display feedback to the user with modals
+    function showOutcomeMessage(title, message, outcome, updatedBalance) {
+        let modal = new bootstrap.Modal(document.getElementById('outcomeModal'), {});
+        document.getElementById('game-action').textContent = title;
+        document.getElementById('message').textContent = message;
+        document.getElementById('outcome').textContent = outcome;
+        document.getElementById('updated-balance').textContent = updatedBalance;
+        modal.show();
+    } 
+    // Helper Function that will toggle UI of modal depending if there is an error or not
+    function toggleModalStatus(isError) {
+        const modal = document.getElementById('outcomeModal');
+        if(isError) 
+            modal.classList.add('error-modal');
+        else
+            modal.classList.remove('error-modal');
+    }
+
+    /************ Send & Get Date from Flask Backend ************/  
     function sendDataToBackend(data) {
         fetch(`/home/hi-lo/${mode}`, {
             method: "POST",
@@ -240,26 +332,16 @@ document.addEventListener("DOMContentLoaded", function() {
             body: JSON.stringify(data),
         })
         .then(response => response.json())
-        .then(data => {
+        .then(data => {     // Handle any response from the backend here
             console.log(data);
-            // Handle any response from the backend here
+
             if(data.result == 'loss') {
-                let lossModal = new bootstrap.Modal(document.getElementById('outcomeModal'), {});
-                document.getElementById('game-action').textContent = "Game Over";
-                document.getElementById('message').textContent = "Not this time... 🍀 Luck's bound to turn around!";
-                document.getElementById('outcome').textContent = "Losses: $" +data.lost_money;
-                document.getElementById('updated-balance').textContent = data.updated_currency;
-                lossModal.show();
+                showOutcomeMessage("Game Over", "Not this time... 🍀 Luck's bound to turn around!", `Losses: $${data.lost_money}`, `New Balance: $${data.updated_currency}`)
                 startNewRound();
             } 
-            if(data.success != undefined) {
-                let winModal = new bootstrap.Modal(document.getElementById('outcomeModal'), {});
-                document.getElementById('game-action').textContent = "Cash Out";
-                document.getElementById('message').textContent = "🎉 Congratulations! You've struck gold! 🥇 Keep your streak alive!";
-                document.getElementById('outcome').textContent = "Winnings: $" + data.win_amount;
-                document.getElementById('updated-balance').textContent = data.updated_currency;
-                winModal.show();
-            }
+            // Handles user action - cashout 
+            if(data.success != undefined) 
+                showOutcomeMessage("Cash Out!", "🎉 Congratulations! You've struck gold! 🥇 Keep your streak alive!", `Winnings: $${data.win_amount}`, `New Balance: $${data.updated_currency}`);
             if(data.updated_mult != undefined)
                 document.getElementById('multiplier').innerHTML = data.updated_mult;
             if(data.updated_currency != undefined)
@@ -269,6 +351,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error:', error);
         });
     }
+
     // Add an action when a button is clicked
     higherButton.addEventListener('click', handleClick);
     lowerButton.addEventListener('click', handleClick);
@@ -286,10 +369,18 @@ document.addEventListener("DOMContentLoaded", function() {
         sendDataToBackend(data);
         startNewRound(); 
     });
+    // Actions for when start game is clicked
     startButton.addEventListener('click', function() {
-        this.style.display = 'none';
-        mainGame();
+        console.log('start button clicked');
+        if (validateForm()) { // Valid bet entered, start the game
+            this.style.display = 'none';
+            mainGame();
+        } else {
+            // Invalid bet entered, validateForm() should handle showing the message
+            console.log('Invalid bet amount data');
+        }
     });
+    // CSS for buttons - make sure effects take place when clicked
     document.querySelectorAll('button').forEach(button => {
         button.addEventListener('click', () => {
             // Temporarily add a class or directly manipulate the style
@@ -303,4 +394,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }, 200); // Adjust time based on your needs and the length of your animations
         });
     });
+    window.addEventListener('beforeunload', function (e) {
+        // Cancel the event
+        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        e.returnValue = 'Are you sure? Changes might be lost';
+      });
 });
